@@ -3,7 +3,7 @@ from time import sleep
 
 import pygame
 
-from AlienInvasion.star import Star
+from star import Star
 from random import randint
 from settings import Settings
 from game_stats import GameStats
