@@ -1,2 +1,2 @@
-# portfolio-repo
-A portfolio of my own projects, guided and un-guided.
+# Space-Invaders Style Game
+A game that demonstrates my ability to manage a project end-to-end: readability, user input, classes, nested loops.
