@@ -90,6 +90,8 @@ class AlienInvasion:
     def _check_play_button(self, mouse_pos):
         """Start a new game if the player clicks button rectangle"""
         if self.play_button.rect.collidepoint(mouse_pos) and not self.stats.game_active:
+            # Reset the game settings
+            self.settings.initialize_dynamic_settings()
             # Call start game to begin game
             self._start_game()
 
@@ -265,6 +267,7 @@ class AlienInvasion:
             # Destroy existing bullets and create a new row of aliens
             self.bullets.empty()
             self._create_fleet()
+            self.settings.increase_speed()
 
 if __name__ == '__main__':
     # Make a game instance, and run the game

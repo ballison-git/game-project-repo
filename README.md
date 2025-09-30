@@ -1,4 +1,4 @@
-# Space-Invaders Style Game
+# Space-Invaders Style Game W.I.P
 This game is a python build of space-invaders.
 The user controls a spaceship at the bottom of the screen, able to move left or right, and fire bullets.
 A fleet of aliens move down the screen until they are all wiped out, or until the player dies.
