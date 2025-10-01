@@ -3,10 +3,11 @@ from time import sleep
 
 import pygame
 
-from star import Star
 from random import randint
+from star import Star
 from settings import Settings
 from game_stats import GameStats
+from scoreboard import Scoreboard
 from button import Button
 from ship import Ship
 from bullet import Bullet
@@ -26,13 +27,20 @@ class AlienInvasion:
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self.stars = pygame.sprite.Group()
+
+        #Create instance to hold game stats and create scoreboard
         self.stats = GameStats(self)
+        self.sb = Scoreboard(self)
 
         self._create_star_fleet()
         self._create_fleet()
 
         # Make the play button
-        self.play_button = Button(self,"Play")
+        self.play_button = Button(self,"Play",(0,168,0),200,50)
+
+        # Make the difficulty buttons
+        self.easy_button = Button(self, 'Easy', (236,241,7),120,40)
+        self.insane_button = Button(self, 'Insane', (255, 0,0) ,120, 40)
 
         #set the background colour
         self.bg_color = self.settings.bg_color
@@ -60,7 +68,7 @@ class AlienInvasion:
                 self._check_keyup_events(event)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
-                self._check_play_button(mouse_pos)
+                self._check_buttons(mouse_pos)
 
 
     def _check_keydown_events(self, event):
@@ -87,18 +95,31 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = False
 
-    def _check_play_button(self, mouse_pos):
+    def _check_buttons(self, mouse_pos):
         """Start a new game if the player clicks button rectangle"""
         if self.play_button.rect.collidepoint(mouse_pos) and not self.stats.game_active:
             # Reset the game settings
             self.settings.initialize_dynamic_settings()
+            self.stats.reset_stats()
+            self.sb.prep_score()
+            self.sb.prep_ships()
             # Call start game to begin game
             self._start_game()
+
+
+        # Set difficulties
+        elif self.easy_button.rect.collidepoint(mouse_pos) and not self.stats.game_active:
+            # Set difficulty to easy
+            self.settings.difficulty_value = 0
+        elif self.insane_button.rect.collidepoint(mouse_pos) and not self.stats.game_active:
+            self.settings.difficulty_value = 1
+
 
     def _start_game(self):
 
         self.stats.reset_stats()
         self.stats.game_active = True
+
 
         # Get rid of any remaining aliens and bullets
         self.aliens.empty()
@@ -115,8 +136,9 @@ class AlienInvasion:
         """Respond to ship being hit by alien"""
         #decrement ships left
         if self.stats.ships_left > 0:
-            # Decrement ships left
+            # Decrement ships left, and update scoreboard
             self.stats.ships_left -= 1
+            self.sb.prep_ships()
             # get rid of remaining aliens and bullets
             self.aliens.empty()
             self.bullets.empty()
@@ -239,9 +261,16 @@ class AlienInvasion:
             bullet.draw_bullet()
         self.aliens.draw(self.screen)
 
-        #Draw play button if game inactive
+        #Draw scoreboard information
+        self.sb.show_score()
+
+        #Draw buttons if game inactive
         if not self.stats.game_active:
             self.play_button.draw_button()
+            self.easy_button.draw_button_custom(self.screen.get_rect().center[0]-(0.5*self.easy_button.width),
+                                                self.screen.get_rect().center[1]-(1.5*self.play_button.height))
+            self.insane_button.draw_button_custom(self.screen.get_rect().center[0]-(0.5*self.insane_button.width),
+                                                self.screen.get_rect().center[1]-(2.5*self.play_button.height))
 
         # make the most recently drawn screen visible
         pygame.display.flip()
@@ -262,6 +291,12 @@ class AlienInvasion:
         # If so get rid of the bullet and the alien
         collisions = pygame.sprite.groupcollide(
             self.bullets, self.aliens, True, True)
+        # Score update for every alien shot down
+        if collisions:
+            for aliens in collisions.values():
+                self.stats.score += self.settings.alien_points * len(aliens)
+            self.sb.prep_score()
+            self.sb.check_high_score()
 
         if not self.aliens:
             # Destroy existing bullets and create a new row of aliens

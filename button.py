@@ -1,14 +1,14 @@
 import pygame.font
 
 class Button:
-    def __init__(self,ai_game,msg):
+    def __init__(self,ai_game,msg,color,width,height):
         """initialise button attributes"""
         self.screen = ai_game.screen
         self.screen_rect = self.screen.get_rect()
 
         #set dimensions and properties of the button
-        self.width, self.height = 200, 50
-        self.button_color = (0,168,0)
+        self.width, self.height = width, height
+        self.button_color = color
         self.text_color = (255,255,255)
         self.font = pygame.font.SysFont(None,48)
 
@@ -29,3 +29,11 @@ class Button:
         #Draw a blank button and then draw message
         self.screen.fill(self.button_color, self.rect)
         self.screen.blit(self.msg_image,self.msg_image_rect)
+
+    def draw_button_custom(self,x,y):
+        self.rect = pygame.Rect(x, y, self.width, self.height)
+        self.msg_image_rect.center = self.rect.center
+        #Draw blank button and message where creator chooses
+        self.screen.fill(self.button_color,self.rect)
+        self.screen.blit(self.msg_image,self.msg_image_rect)
+
